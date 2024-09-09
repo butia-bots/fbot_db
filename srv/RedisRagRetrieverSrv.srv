@@ -1,0 +1,4 @@
+string question # Request message
+uint16 k # K-neighbors to similarity search
+---
+float64[] context # Response message

@@ -1,0 +1,6 @@
+<launch>
+    <rosparam file="$(find fbot_db)/config/redis_rag.yaml" ns="fbot_db" command="load" />
+    <rosparam file="$(find fbot_db)/config/plugin.yaml" ns="fbot_db" command="load" />
+    <node pkg="fbot_db" type="redis_rag_retriever_node.py" name="redis_rag_retriever" output="screen"> 
+    </node>
+</launch>
