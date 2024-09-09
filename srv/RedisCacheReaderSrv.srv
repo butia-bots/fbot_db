@@ -1,0 +1,3 @@
+std_msgs/Empty empty# Request message
+---
+butia_vision_msgs/FaceEncoding response# Response
