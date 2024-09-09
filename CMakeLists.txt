@@ -55,6 +55,8 @@ add_message_files(
 add_service_files(
   RedisCacheReaderSrv.srv
   RedisCacheWriterSrv.srv
+  RedisInjectPdfContextSrv.srv
+  RedisRagRetrieverSrv
 )
 
 ## Generate actions in the 'action' folder

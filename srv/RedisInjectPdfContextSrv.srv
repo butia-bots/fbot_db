@@ -1,0 +1,3 @@
+string pdf_path # Request message
+---
+bool response # Response message
