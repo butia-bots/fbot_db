@@ -1,0 +1,6 @@
+<launch>
+    <rosparam file="$(find fbot_db)/config/redis_cache.yaml" ns="fbot_db" command="load" />
+    <rosparam file="$(find fbot_db)/config/plugin.yaml" ns="fbot_db" command="load" />
+    <node pkg="fbot_db" type="redis_cache_reader.py" name="redis_cache_reader" output="screen"> 
+    </node>
+</launch>

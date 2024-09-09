@@ -7,7 +7,11 @@ project(fbot_db)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS std_msgs message_generation)
+find_package(catkin REQUIRED COMPONENTS 
+  rospy
+  std_msgs 
+  message_generation
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -49,7 +53,8 @@ add_message_files(
 
 ## Generate services in the 'srv' folder
 add_service_files(
-  FILES
+  RedisCacheReaderSrv.srv
+  RedisCacheWriterSrv.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -63,6 +68,7 @@ add_service_files(
 generate_messages(
   DEPENDENCIES
   std_msgs  # Or other packages containing msgs
+  butia_vision_msgs
 )
 
 ################################################
@@ -94,12 +100,7 @@ generate_messages(
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES fbot_llm_agent
-#  CATKIN_DEPENDS other_catkin_pkg
-#  DEPENDS system_lib
-)
+catkin_package(CATKIN_DEPENDS std_msgs butia_vision_msgs)
 
 ###########
 ## Build ##

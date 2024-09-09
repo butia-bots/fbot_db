@@ -1,0 +1,3 @@
+butia_vision_msgs/FaceEncoding description # Request message
+---
+bool response # Response message
