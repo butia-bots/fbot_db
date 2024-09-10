@@ -1,4 +1,8 @@
 from .redis_rag_inject import RedisRAGInject
+from fbot_db.srv import RedisRagRetrieverSrv, RedisRagRetrieverSrvResponse
+
+from langchain.docstore.document import Document
+from langchain_redis import RedisConfig, RedisVectorStore
 
 class RedisRAGRetriever(RedisRAGInject):
     def __init__(self):
@@ -13,5 +17,11 @@ class RedisRAGRetriever(RedisRAGInject):
         question = req.question
         k = req.k
         retriever = self.vector_store.as_retriever(search_type="similarity", search_kwargs={"k": k})
-        answer = retriever.get_relevant_documents(question)
-        return answer # [Document]
+        
+        # Retrieve relevant documents
+        context = retriever.get_relevant_documents(question)
+        
+        response = RedisRagRetrieverSrvResponse()
+        response.context = [Document(page_content=doc.page_content) for doc in context]
+        
+        return response

@@ -55,7 +55,7 @@ add_message_files(
 add_service_files(
   RedisCacheReaderSrv.srv
   RedisCacheWriterSrv.srv
-  RedisInjectPdfContextSrv.srv
+  RedisRagInjectSrv.srv
   RedisRagRetrieverSrv
 )
 

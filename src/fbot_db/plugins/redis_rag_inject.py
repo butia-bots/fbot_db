@@ -7,7 +7,7 @@ from langchain.docstore.document import Document
 import rospy
 
 from .world_plugin import WorldPlugin
-from fbot_db.srv import RedisInjectPdfContextSrv
+from fbot_db.srv import RedisRagInjectSrv
 
 class RedisRAGInject(WorldPlugin):
     def __init__(self):
@@ -20,7 +20,7 @@ class RedisRAGInject(WorldPlugin):
         self.vector_store = RedisVectorStore(self.embeddings, self.config)
     
     def run(self):
-        rospy.Service('redis_inject_pdf_context_srv', RedisInjectPdfContextSrv, self._on_load_pdf)
+        rospy.Service('redis_rag_inject_srv', RedisRagInjectSrv, self._on_load_pdf)
         rospy.spin()
     
     def _separate_pdf_context(self, text):
