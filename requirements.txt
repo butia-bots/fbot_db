@@ -1,2 +1,4 @@
 redis
 redis-cli
+langchain
+langchain-redis
