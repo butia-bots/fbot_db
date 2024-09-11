@@ -1,10 +1,11 @@
-from .redis_rag_inject import RedisRAGInject
+from .redis_rag_injector import RedisRAGInjector
 from fbot_db.srv import RedisRagRetrieverSrv, RedisRagRetrieverSrvResponse
 
 from langchain.docstore.document import Document
-from langchain_redis import RedisConfig, RedisVectorStore
 
-class RedisRAGRetriever(RedisRAGInject):
+import rospy
+
+class RedisRAGRetriever(RedisRAGInjector):
     def __init__(self):
         super().__init__()
         self.retriever = self.vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 12})
@@ -22,6 +23,8 @@ class RedisRAGRetriever(RedisRAGInject):
         context = retriever.get_relevant_documents(question)
         
         response = RedisRagRetrieverSrvResponse()
-        response.context = [Document(page_content=doc.page_content) for doc in context]
+        # Extract the page_content and metadata from each document
+        response.page_contents = [doc.page_content for doc in context]
+        response.metadata = [str(doc.metadata) for doc in context]  # Convert metadata to string if needed
         
         return response

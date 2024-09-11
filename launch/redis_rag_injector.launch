@@ -1,0 +1,5 @@
+<launch>
+    <rosparam file="$(find fbot_db)/config/redis_rag.yaml" ns="fbot_db" command="load" />
+    <node pkg="fbot_db" type="redis_rag_injector_node.py" name="redis_rag_injector" output="screen"> 
+    </node>
+</launch>

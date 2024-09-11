@@ -1,4 +1,5 @@
-string question # Request message
-uint16 k # K-neighbors to similarity search
+string question  # Request message
+uint16 k  # K-neighbors to similarity search
 ---
-float64[] context # Response message
+string[] page_contents  # Response message (the content of each document)
+string[] metadata  # Additional metadata for each document

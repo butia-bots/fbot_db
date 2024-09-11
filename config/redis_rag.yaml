@@ -1,0 +1,3 @@
+redis_rag:
+  index_name: "quiz-context"
+  

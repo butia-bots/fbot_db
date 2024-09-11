@@ -1,23 +1,24 @@
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain.text_splitter import CharacterTextSplitter,RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OllamaEmbeddings
-from langchain_redis import RedisConfig, RedisVectorStore
+from langchain_community.vectorstores.redis import Redis
 from langchain.docstore.document import Document
 
 import rospy
+import rospkg
+import os
 
-from .world_plugin import WorldPlugin
 from fbot_db.srv import RedisRagInjectSrv
 
-class RedisRAGInject(WorldPlugin):
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6380")
+class RedisRAGInjector():
     def __init__(self):
-        super().init()
         self.embeddings = OllamaEmbeddings(model="nomic-embed-text")
-        self.config = RedisConfig(
+        self.vector_store = Redis(
+            embedding=self.embeddings, 
             index_name="quiz-context",
-            redis_client=self.r,
-        )
-        self.vector_store = RedisVectorStore(self.embeddings, self.config)
+            redis_url= REDIS_URL
+            )
     
     def run(self):
         rospy.Service('redis_rag_inject_srv', RedisRagInjectSrv, self._on_load_pdf)
@@ -41,27 +42,26 @@ class RedisRAGInject(WorldPlugin):
         
         return context_text
     
-    def _injectToRedis(self, text):
-        self.vector_store.add_documents(texts=text)
+    def _injectToRedis(self, texts):
+        documents = [Document(page_content=text) for text in texts]
+        self.vector_store.add_documents(documents=documents)
+        rospy.loginfo('Data pushed to Redis')
     
     def _on_load_pdf(self, req):
-        try:
-            pdf_path = req.pdf_path
-            
-            # Load and extract text from the PDF file
-            loader = PyPDFDirectoryLoader(pdf_path)
-            docs = loader.load()
-            docs = self._separate_pdf_context(docs)
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=300, chunk_overlap=50)
-            chunks = text_splitter.split_documents(docs)
-            # Extract text content from each chunk
-            texts = [chunk.page_content for chunk in chunks]
-            self._injectToRedis(texts)
-            
-            return True
+        pdf_path = req.pdf_path
+        pdf_path = pdf_path.split("\\")
+        pkg_dir = rospkg.RosPack().get_path(pdf_path[0])
+        pdf_path_new = os.path.join(pkg_dir, pdf_path[1], pdf_path[2])
         
-        except Exception as e:
-            rospy.logerr(f"Failed to load PDF file: {pdf_path}")
-            rospy.logerr(e)
-            return False
+        # Load and extract text from the PDF file
+        loader = PyPDFDirectoryLoader(pdf_path_new)
+        docs = loader.load()
+        docs = self._separate_pdf_context(docs)
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=300, chunk_overlap=50)
+        chunks = text_splitter.split_documents(docs)
         
+        # Extract text content from each chunk
+        texts = [chunk.page_content for chunk in chunks]
+        self._injectToRedis(texts)
+
+        return True
