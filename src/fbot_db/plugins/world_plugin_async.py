@@ -1,9 +1,8 @@
-import rospy
+import rclpy
 import asyncio
 from aioredis import Redis
-from aioredis import BlockingConnectionPool, Redis
+from aioredis import BlockingConnectionPool
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
-
 
 class WorldPluginAsync:
     def __init__(self, host="localhost", port=6379, decode_responses=True) -> None:

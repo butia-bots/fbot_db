@@ -1,27 +1,26 @@
-import rospy
-from butia_vision_msgs.msg import FaceEncoding, FaceDescription
+import rclpy
+from rclpy.node import Node
+from fbot_vision_msgs.msg import FaceEncoding, FaceDescription
 from std_msgs.msg import Header
 from fbot_db.srv import RedisCacheReaderSrv
 
 from .world_plugin import WorldPlugin
-class RedisCacheReader(WorldPlugin):
+
+class RedisCacheReader(WorldPlugin, Node):
 
     def __init__(self):
-        WorldPlugin.__init__(self)
+        WorldPlugin.__init__(self, 'reader_world_plugin')
+        Node.__init__(self, 'redis_cache_reader')
         self.cache = {}
+        self.srv = self.create_service(RedisCacheReaderSrv, 'redis_cache_reader_srv', self.get_from_redis_cache)
+        self.get_logger().info('Cache is being updated')
         
-    def run(self):
-        rospy.Service('redis_cache_reader_srv', RedisCacheReaderSrv, self.getFromRedisCache)
-        rospy.loginfo('Cache is being updated')
-        #self._getDataFromRedis()
-        rospy.spin()
-        
-    def getFromRedisCache(self, request):
-        data = self._getDataFromRedis()
-        return data
+    def get_from_redis_cache(self, request, response):
+        data = self._get_data_from_redis()
+        response.data = data
+        return response
     
-        
-    def _getDataFromRedis(self, pattern = 'faces:*'):
+    def _get_data_from_redis(self, pattern='faces:*'):
         cursor = 0
         # Scan keys matching the pattern "faces:*"
         while True:
@@ -32,13 +31,13 @@ class RedisCacheReader(WorldPlugin):
             cursor = count
             if cursor == 0:
                 break
-        data = self.encapsulateData()
+        data = self.encapsulate_data()
         return data
     
-    def encapsulateData(self) -> None:
+    def encapsulate_data(self):
         redis_cache = FaceEncoding()
         h = Header()
-        h.stamp = rospy.Time.now()
+        h.stamp = self.get_clock().now().to_msg()
         redis_cache.header = h
         
         for key, item in self.cache.items():
@@ -48,7 +47,7 @@ class RedisCacheReader(WorldPlugin):
             encodings = content_dict['face_encode']
             
             h = Header()
-            h.stamp = rospy.Time.now()
+            h.stamp = self.get_clock().now().to_msg()
             h.frame_id = key.decode('utf-8')
             
             for encoding in encodings:

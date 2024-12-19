@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
-import rospy
+import rclpy
 from fbot_db.plugins import RedisRAGInjector
 
+def main(args=None):
+    rclpy.init(args=args)
+    redis_rag_injector = RedisRAGInjector()
+    rclpy.spin(redis_rag_injector)
+    redis_rag_injector.destroy_node()
+    rclpy.shutdown()
+
 if __name__ == '__main__':
-  rospy.init_node('redis_rag_injector')
-  rospy.loginfo('Starting redis rag inject')
-  plugin = RedisRAGInjector()
-  plugin.run()
+    main()

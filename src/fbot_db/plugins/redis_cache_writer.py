@@ -1,18 +1,17 @@
-import rospy
+import rclpy
+from rclpy.node import Node
 import uuid
 from fbot_db.srv import RedisCacheWriterSrv
 
 from .world_plugin import WorldPlugin
 
-class RedisCacheWriter(WorldPlugin):
+class RedisCacheWriter(WorldPlugin, Node):
 
     def __init__(self):
-        WorldPlugin.__init__(self)
+        WorldPlugin.__init__(self, 'writer_world_plugin')
+        Node.__init__(self, 'redis_cache_writer')
         self.cache = {}
-
-    def run(self):
-        rospy.Service('redis_cache_writer_srv', RedisCacheWriterSrv, self._on_recognition)
-        rospy.spin()
+        self.srv = self.create_service(RedisCacheWriterSrv, 'redis_cache_writer_srv', self._on_recognition)
         
     def _generate_uid(self):
         return str(uuid.uuid4())
@@ -34,15 +33,16 @@ class RedisCacheWriter(WorldPlugin):
         try:
             self.r.hset(description_id, 'content', str(data))
         except Exception as e:
-            rospy.logerr(e)
+            self.get_logger().error(str(e))
         return 
   
-    def _on_recognition(self, request):
+    def _on_recognition(self, request, response):
         try:
             composed = self._toCompose(request)
             self._pushToRedis(composed)
-            rospy.loginfo('Data pushed to Redis')
-            return True
+            self.get_logger().info('Data pushed to Redis')
+            response.success = True
         except Exception as e:
-            rospy.logerr(e)
-            return False
+            self.get_logger().error(str(e))
+            response.success = False
+        return response
